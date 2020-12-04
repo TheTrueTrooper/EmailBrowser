@@ -200,7 +200,6 @@
     <Content Include="Views\EmailAccount\Login.cshtml" />
     <Content Include="Views\EmailAccount\Dashboard.cshtml" />
     <Content Include="Views\Shared\_LayoutEmail.cshtml" />
-    <Content Include="Views\EmailAccount\Old dash\Dashboard.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
