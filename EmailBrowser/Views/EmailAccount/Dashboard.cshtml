@@ -1,0 +1,315 @@
+﻿@{
+    ViewBag.Title = "Dashboard";
+    Layout = "~/Views/Shared/_LayoutEmail.cshtml";
+}
+<script src="~/Scripts/angular.js"></script>
+<script src="~/Scripts/angular-animate.js"></script>
+<script src="~/Scripts/angular-cookies.js"></script>
+<script src="~/Scripts/angular-route.js"></script>
+<script src="~/Scripts/angular-sanitize.js"></script>
+<script src="~/Scripts/EmailDashboard-angular.js"></script>
+<div ng-app="NGEmailDashboard">
+    <div ng-controller="EmailAPIController">
+        <div class="sidenav">
+            <div>
+                <a data-toggle="modal" data-target="#NewMailBoxModal">
+                    + New Mailbox
+                </a>
+            </div>
+            <div>
+                <a ng-click="Refresh()">
+                    &#183 Refresh All
+                </a>
+            </div>
+            <div>
+                <a ng-if="!NotInbox" style="color:#808080">
+                    - Delete Mailbox
+                </a>
+                <a ng-if="NotInbox" data-toggle="modal" data-target="#DeleteMailBoxModal" disabled>
+                    - Delete Mailbox
+                </a>
+            </div>
+            <div ng-repeat="Boxes in MailBoxes">
+                <a ng-click="SelectMailbox(Boxes.Name)">
+                    <p>
+                        {{Boxes.Name}}<br />
+                        Messages: {{Boxes.Messages}}<br />
+                        Unread Messages: {{Boxes.Unread}}
+                    </p>
+                </a>
+
+            </div>
+        </div>
+        <div class="sidenav2">
+            <div>
+                <a data-toggle="modal" data-target="#CreateNewEmailModal">
+                    + New Email
+                </a>
+            </div>
+            <div>
+                <a ng-if="CurrentEmail===null" style="color:#808080">
+                    + Reply Email
+                </a>
+                <a ng-if="CurrentEmail!==null" data-toggle="modal" data-target="#ReplyToEmailModal">
+                    + Reply Email
+                </a>
+            </div>
+            <div>
+                <a ng-if="CurrentEmail===null" style="color:#808080">
+                    &#183 Copy Email
+                </a>
+                <a ng-if="CurrentEmail!==null" data-toggle="modal" data-target="#CopyEmailModal">
+                    &#183 Copy Email
+                </a>
+            </div>
+            <div>
+                <a ng-if="CurrentEmail===null" style="color:#808080">
+                    &#183 Move Email
+                </a>
+                <a ng-if="CurrentEmail!==null" data-toggle="modal" data-target="#MoveEmailModal">
+                    &#183 Move Email
+                </a>
+            </div>
+            <div>
+                <a ng-if="CurrentEmail===null" style="color:#808080">
+                    - Delete Email
+                </a>
+                <a ng-if="CurrentEmail!==null" data-toggle="modal" data-target="#DeleteEmailModal">
+                    - Delete Email
+                </a>
+            </div>
+            <div ng-repeat="Email in CurrentMailBox.UnseenEmails">
+                <a ng-click="SelectEmail(Email.UDI)">
+                    <p>
+                        Unread!!<br />
+                        Subject: {{Email.Subject}}<br />
+                        From: {{Email.Messages}}<br />
+                        To: <text ng-repeat="To in Email.To">{{To.DisplayName}}</text>
+                    </p>
+                </a>
+            </div>
+            <div ng-repeat="Email in CurrentMailBox.SeenEmails">
+                <a ng-click="SelectEmail(Email.UDI)">
+                    <p>
+                        Subject: {{Email.Subject}}<br />
+                        From: {{GetFullEmail(Email.From)}}<br />
+                        @*To: <text ng-repeat="To in Email.To">{{To.DisplayName+"<"+To.Address+">"}} </text>*@
+                        To: <text ng-repeat="To in Email.To">{{To.DisplayName}}</text>
+                    </p>
+                </a>
+            </div>
+        </div>
+        <div class="main2">
+            <div class="emailInfo">
+                <div>From: <text ng-if="CurrentEmail!=null">{{GetFullEmail(CurrentEmail.From)}}</text></div>
+                <div>To: <text ng-repeat="To in CurrentEmail.To">{{GetFullEmail(To)}}</text></div>
+                <div>CC: <text ng-repeat="CC in CurrentEmail.CC">{{GetFullEmail(CC)}}</text></div>
+                <div>BCC: <text ng-repeat="BCC in CurrentEmail.BCC">{{GetFullEmail(BCC)}}</text></div>
+            </div>
+            <div class="emailBody" style="font-size:12pt;white-space:pre-wrap;">
+                <text>{{CurrentEmail.Body}}</text>
+            </div>
+        </div>
+        <div id="NewMailBoxModal" class="modal fade" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title">New Mailbox</h4>
+                    </div>
+                    <div class="modal-body">
+                        <p>Please enter a new name for you mailbox.</p>
+                        @using (Html.BeginForm("Login", "Mail", new { ReturnUrl = ViewBag.ReturnUrl }, FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+                        {
+                            <div class="form-group">
+                                @Html.Label("New Name", new { @class = "col-md-2 control-label" })
+                                <div class="col-md-10">
+                                    @Html.TextBox("NewMailBoxName", "", new { @class = "form-control" })
+                                </div>
+                            </div>
+                        }
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Create New Mailbox</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        <div id="MoveEmailModal" class="modal fade" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title">New Mailbox</h4>
+                    </div>
+                    <div class="modal-body">
+                        <p>Please enter a mailbox to move the email to.</p>
+                            <div class="form-group">
+                                @Html.Label("To Folder", new { @class = "col-md-2 control-label" })
+                                <div class="col-md-10">
+                                    @Html.TextBox("MoveEmailTo", "", new { @class = "form-control" })
+                                </div>
+                            </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Move Email</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        <div id="CopyEmailModal" class="modal fade" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title">New Mailbox</h4>
+                    </div>
+                    <div class="modal-body">
+                        <p>Please enter a mailbox to copy the email to.</p>
+                            <div class="form-group">
+                                @Html.Label("To Folder", new { @class = "col-md-2 control-label" })
+                                <div class="col-md-10">
+                                    @Html.TextBox("CopyEmailTo", "", new { @class = "form-control" })
+                                </div>
+                            </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Copy Email</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        <div id="DeleteMailBoxModal" class="modal fade" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title">Delete Mailbox</h4>
+                    </div>
+                    <div class="modal-body">
+                        <p>Are you sure.</p>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">Yes Delete It</button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        <div id="CreateNewEmailModal" class="modal fade" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title">Send New Email</h4>
+                    </div>
+                    <div class="modal-body">
+                        <p>Fill out email.</p>
+                            <div class="form-group" style="width:100%">
+                                @Html.Label("To", new { @class = "col-md-2 control-label" })
+                                <div class="col-md-10">
+                                    @Html.TextBox("NewEmailTo", "", new { @class = "form-control", style = "width:100%;" })
+                                </div>
+                            </div>
+                            <div class="form-group" style="width:100%">
+                                @Html.Label("CC", new { @class = "col-md-2 control-label" })
+                                <div class="col-md-10">
+                                    @Html.TextBox("NewEmailCC", "", new { @class = "form-control", style = "width:100%;" })
+                                </div>
+                            </div>
+                            <div class="form-group" style="width:100%">
+                                @Html.Label("BCC", new { @class = "col-md-2 control-label" })
+                                <div class="col-md-10">
+                                    @Html.TextBox("NewEmailBCC", "", new { @class = "form-control", style = "width:100%;" })
+                                </div>
+                            </div>
+                            <div class="form-group" style="width:100%">
+                                @Html.Label("Subject", new { @class = "col-md-2 control-label" })
+                                <div class="col-md-10">
+                                    @Html.TextBox("NewEmailSubject", "", new { @class = "form-control", style = "width:100%;" })
+                                </div>
+                            </div>
+                            <div class="form-group" style="width:100%">
+                                @Html.Label("Body", new { @class = "col-md-2 control-label" })
+                                <div class="col-md-10">
+                                    @Html.TextArea("NewEmailBody", "", new { @class = "form-control", style = "width:100%;height:300px;" })
+                                </div>
+                            </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">Send</button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        <div id="ReplyToEmailModal" class="modal fade" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title">Reply to Email</h4>
+                    </div>
+                    <div class="modal-body">
+                        <p>Fill out email.</p>
+                            <div class="form-group" style="width:100%">
+                                @Html.Label("To", new { @class = "col-md-2 control-label" })
+                                <div class="col-md-10">
+                                    @Html.TextBox("NewEmailTo", "", new { @class = "form-control", style = "width:100%;", ng_model = "ReplyEmail.To" })
+                                </div>
+                            </div>
+                            <div class="form-group" style="width:100%">
+                                @Html.Label("CC", new { @class = "col-md-2 control-label" })
+                                <div class="col-md-10">
+                                    @Html.TextBox("NewEmailCC", "", new { @class = "form-control", style = "width:100%;", ng_model = "ReplyEmail.CC" })
+                                </div>
+                            </div>
+                            <div class="form-group" style="width:100%">
+                                @Html.Label("BCC", new { @class = "col-md-2 control-label" })
+                                <div class="col-md-10">
+                                    @Html.TextBox("NewEmailBCC", "", new { @class = "form-control", style = "width:100%;", ng_model = "ReplyEmail.BCC" })
+                                </div>
+                            </div>
+                            <div class="form-group" style="width:100%">
+                                @Html.Label("Subject", new { @class = "col-md-2 control-label" })
+                                <div class="col-md-10">
+                                    @Html.TextBox("NewEmailSubject", "", new { @class = "form-control", style = "width:100%;", ng_model = "ReplyEmail.Subject" })
+                                </div>
+                            </div>
+                            <div class="form-group" style="width:100%">
+                                @Html.Label("Body", new { @class = "col-md-2 control-label" })
+                                <div class="col-md-10">
+                                    @Html.TextArea("NewEmailBody", "", new { @class = "form-control", style = "width:100%;height:300px;", ng_model = "ReplyEmail.Body" })
+                                </div>
+                            </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">Send</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="DeleteEmailModal" class="modal fade" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title">Delete Email</h4>
+                    </div>
+                    <div class="modal-body">
+                        <p>Are you sure.</p>
+                        <div class="modal-footer">
+                            <button type="button" ng-click="DeleteEmail(CurrentEmail.UDI)" class="btn btn-default" data-dismiss="modal">Yes Delete It</button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+

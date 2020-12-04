@@ -1,0 +1,111 @@
+﻿body {
+    padding-top: 50px;
+    padding-bottom: 20px;
+}
+
+/* Set padding to keep content from hitting the edges */
+.body-content {
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+/* Override the default bootstrap behavior where horizontal description lists 
+   will truncate terms that are too long to fit in the left column 
+*/
+.dl-horizontal dt {
+    white-space: normal;
+}
+
+/* Set width on the form input elements since they're 100% wide by default */
+input,
+select,
+textarea {
+    max-width: 280px;
+}
+
+.sidenav {
+    height: 100%;
+    width: 160px;
+    position: fixed;
+    z-index: 1;
+    top: 50px;
+    left: 0;
+    background-color: #111;
+    overflow-x: hidden;
+    padding-top: 20px;
+}
+
+.sidenav a {
+     padding: 6px 8px 6px 16px;
+     text-decoration: none;
+     font-size: 25px;
+     color: #DFDFDF;
+     display: block;
+     font-size: 12px !important;
+}
+
+.sidenav a:hover {
+    color: #FFFFFF;
+    background-color:#999;
+}
+
+.sidenav2 {
+    height: 100%;
+    width: 250px;
+    position: fixed;
+    z-index: 1;
+    top: 50px;
+    left: 160px;
+    background-color: #222;
+    overflow-x: hidden;
+    padding-top: 20px;
+}
+
+.selected {
+    color: #999;
+    background-color: #FFFFFF;
+}
+
+.sidenav2 a {
+    padding: 6px 8px 6px 16px;
+    text-decoration: none;
+    font-size: 25px;
+    color: #DFDFDF;
+    display: block;
+    font-size: 12px !important;
+}
+
+.sidenav2 a:hover {
+    color: #FFFFFF;
+    background-color:#999;
+}
+
+.main {
+    font-size: 28px; /* Increased text to enable scrolling */
+    padding: 0px 0px;
+    height: 100%;
+    width:100%;
+}
+
+.main2 {
+    font-size: 28px; /* Increased text to enable scrolling */
+    padding: 0px 0px;
+    height: 100%;
+    width: 100%;
+    position: fixed;
+    z-index: 1;
+    top: 50px;
+    left: 410px;
+}
+
+.emailInfo
+{
+    width:100%;
+    color: black;
+    background-color: #BBB;
+}
+
+.emailBody {
+    width: 100%;
+    color: black;
+}

@@ -1,0 +1,77 @@
+﻿@model EmailBrowser.Models.Dashboard
+@{
+    ViewBag.Title = "Dashboard";
+    Layout = "~/Views/Shared/_LayoutEmail.cshtml";
+    EmailBrowser.Models.MailBox CurrentMailBox = null;
+    EmailBrowser.Models.Message CurrentEmail = null;
+    if (Model.FocusedMailBox != null)
+    {
+        CurrentMailBox = Model.FocusedMailBox;
+        if (Model.FocusedMessage != null)
+        {
+            CurrentEmail = Model.FocusedMessage;
+        }
+    }
+    int Counter = 0;
+}
+<div class="sidenav">
+    <a href="">
+        + New Message
+    </a>
+    @for (Counter = 0; Counter < Model.MailBoxes.Length; Counter++)
+    {
+
+        <a href="@($"{Url.Action("Dashboard", "Account")}?FocusedMailBox={Counter}")">
+            <p>
+                @Model.MailBoxes[Counter].Name<br />
+                Messages: @Model.MailBoxes[Counter].MessageCount<br />
+                Unread Messages: @Model.MailBoxes[Counter].UnreadMessageCount
+            </p>
+        </a>
+    }
+</div>
+@if (Model.FocusedMailBox != null)
+{
+    <div class="sidenav2">
+        @if(Model.FocusedMessage != null)
+        {
+            <a href="@($"{Url.Action("DeleteEmail", "Account")}?FocusedMailBox={Model.FocusedMailBoxNumber}&FocusedMailBoxName={Model.FocusedMailBox.Name}&DeleteMessageUDI={Model.FocusedMessage.UDI}")">
+                Delete Current Message
+            </a>
+        }
+        else
+        {
+            <a href="" style="color:gray;">
+                Delete Current Message
+            </a>
+        }
+        @for (Counter = 0; Counter < CurrentMailBox.Messages.Count(); Counter++)
+        {
+            <a href="@($"{Url.Action("Dashboard", "Account")}?FocusedMailBox={Model.FocusedMailBoxNumber}&FocusedMessage={Counter}")">
+                <p>
+                    Subject: @CurrentMailBox.Messages[Counter].TheMessage.Subject<br />
+                    From: @(CurrentMailBox.Messages[Counter].TheMessage?.From?.User != null ? CurrentMailBox.Messages[Counter].TheMessage.From.User : "")
+                </p>
+            </a>
+        }
+    </div>
+    if (Model.FocusedMessage != null)
+    {
+        <div class="main2">
+            <div class="emailInfo">
+                <p>
+                    Sender: @CurrentEmail.TheMessage.Sender<br />
+                    To: @CurrentEmail.TheMessage.To<br />
+                    CC: @CurrentEmail.TheMessage.CC<br />
+                    BCC: @CurrentEmail.TheMessage.Bcc<br />
+                    From: @CurrentEmail.TheMessage.From<br />
+                    Subject: @CurrentEmail.TheMessage.Subject<br />
+                </p>
+            </div>
+            <div class="emailBody">
+                @Html.Raw(CurrentEmail.TheMessage.Body.Replace("\n", "<br/>").Replace("\t", "&tab;"))
+            </div>
+        </div>
+    }
+}
+
